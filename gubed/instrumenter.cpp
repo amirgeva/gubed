@@ -80,7 +80,10 @@ class Module : public IModule, public std::enable_shared_from_this<Module>
 				first = false;
 			}
 		}
-		return os.str();
+		std::string res = os.str();
+		if (res.empty())
+			return "\"\""; // Return empty string if no variables
+		return res;
 	}
 
 	void add_debugger_line(const std::string& ws, const std::string& class_name, const std::string& method_name, size_t line_index, const std::vector<Block>& block_stack)
