@@ -1,6 +1,6 @@
 # gubed - Instrumenting debugger for wren
 
-![Screen shot](https://github.com/amirgeva/gubed/shot.png)
+![Screen shot](https://raw.githubusercontent.com/amirgeva/gubed/refs/heads/main/shot.png)
 
 This is a rudimentary debugger application for wren scripts.
 Instead of using modifications to the VM, or using VM hooks/traps for debugging, it sacrifices runtime performance in exchange for implementation simplicity.
