@@ -6,12 +6,14 @@ import re
 all_initializers=[]
 class_pattern = r'class (\w+)'
 argument_pattern = r'(int|const char\*|const Bytes\&) (\w+)'
+return_type_pattern = r'(void|int|double|bool|std::string)'
 multi_argument_pattern = argument_pattern + r'(, '+argument_pattern+')*'
-func_pattern = r'static (\w+) (\w+)\(([^)]*)\);'
+func_pattern = r'static '+return_type_pattern+r' (\w+)\(([^)]*)\);'
 type_slot_mapping={
     'int': 'Double',
     'double': 'Double',
     'const char*': 'String',
+    'std::string': 'String',
     'bool': 'Bool',
     'const Bytes&': 'Bytes'
 }
@@ -47,7 +49,7 @@ def process_class(header_path: str, module_name: str, class_lines: List[str]):
         m = re.match(func_pattern, line)
         if m:
             g = m.groups()
-            # return_type = g[0]
+            return_type = g[0]
             func_name = g[1]
             arguments = [s for s in g[2].split(',') if s]
             prototype=f'{func_name}(' + ','.join(['_']*len(arguments)) + ')'
@@ -77,7 +79,17 @@ def process_class(header_path: str, module_name: str, class_lines: List[str]):
                     index+=1
             code_line=f'\tforeign static {func_name}({', '.join(arg_names)})'
             code.append(code_line)
-            f.write(f'\t{class_name}::{func_name}({','.join(arg_names)});\n')
+            call_prefix = ''
+            assign_result = ''
+            if return_type != 'void':
+                call_prefix = f'{return_type} result = '
+                result = 'result'
+                if return_type == 'std::string':
+                    result = 'result.c_str()'
+                assign_result = f'\twrenSetSlot{type_to_slot(return_type)}(vm, 0, {result});\n'
+            f.write(f'\t{call_prefix}{class_name}::{func_name}({','.join(arg_names)});\n')
+            if assign_result:
+                f.write(assign_result)
             f.write('}\n')
     binder_name =f'{module_name}_{class_name}_Binder'
     f.write(f'\n\nvoid {binder_name}()\n{{\n')

@@ -1,4 +1,5 @@
 #include <iostream>
+#include <sstream>
 #include <wren.hpp>
 #include <singleton.h>
 #include <binder.h>
@@ -7,6 +8,18 @@
 void Sample::Print(int a)
 {
 	std::cout << a << std::endl;
+}
+
+double Sample::Add(double a, double b)
+{
+	return a + b;
+}
+
+std::string Sample::d2s(double value)
+{
+	std::ostringstream os;
+	os << value;
+	return os.str();
 }
 
 //////////////////////////////////////////////////
@@ -18,13 +31,32 @@ void sample_Sample_Print_wrapper(WrenVM* vm)
 	Sample::Print(value);
 }
 
+void sample_Sample_Add_wrapper(WrenVM* vm)
+{
+	double a = wrenGetSlotDouble(vm, 1);
+	double b = wrenGetSlotDouble(vm, 2);
+	double result = Sample::Add(a,b);
+	wrenSetSlotDouble(vm, 0, result);
+}
+
+void sample_Sample_d2s_wrapper(WrenVM* vm)
+{
+	double value = wrenGetSlotDouble(vm, 1);
+	std::string result = Sample::d2s(value);
+	wrenSetSlotString(vm, 0, result.c_str());
+}
+
 
 void sample_Sample_Binder()
 {
 	Singleton<ForeignFunctions>::Instance().bind("sample.Sample.Print(_)", sample_Sample_Print_wrapper);
+	Singleton<ForeignFunctions>::Instance().bind("sample.Sample.Add(_,_)", sample_Sample_Add_wrapper);
+	Singleton<ForeignFunctions>::Instance().bind("sample.Sample.d2s(_)", sample_Sample_d2s_wrapper);
 	const char* module_code=R"(
 class Sample {
 	foreign static Print(value)
+	foreign static Add(a, b)
+	foreign static d2s(value)
 }
 )";
 	Singleton<ForeignFunctions>::Instance().set_module_code("sample", module_code);
