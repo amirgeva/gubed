@@ -6,7 +6,7 @@
 // Tokenize Tests
 TEST(TokenizeTest, Basic) {
     std::string input = "hello world test string";
-    std::vector<std::string> tokens = tokenize(input, " ", false);
+    std::vector<xstring> tokens = tokenize(input, " ", false);
     
     EXPECT_EQ(tokens.size(), 4);
     EXPECT_EQ(tokens[0], "hello");
@@ -17,7 +17,7 @@ TEST(TokenizeTest, Basic) {
 
 TEST(TokenizeTest, MultipleDelimiters) {
     std::string input = "hello,world;test:string";
-    std::vector<std::string> tokens = tokenize(input, ",;:", false);
+    std::vector<xstring> tokens = tokenize(input, ",;:", false);
     
     EXPECT_EQ(tokens.size(), 4);
     EXPECT_EQ(tokens[0], "hello");
@@ -30,14 +30,14 @@ TEST(TokenizeTest, EmptyTokens) {
     std::string input = "hello,,world,,test";
     
     // Without empty tokens
-    std::vector<std::string> tokensWithoutEmpty = tokenize(input, ",", false);
+    std::vector<xstring> tokensWithoutEmpty = tokenize(input, ",", false);
     EXPECT_EQ(tokensWithoutEmpty.size(), 3);
     EXPECT_EQ(tokensWithoutEmpty[0], "hello");
     EXPECT_EQ(tokensWithoutEmpty[1], "world");
     EXPECT_EQ(tokensWithoutEmpty[2], "test");
     
     // With empty tokens
-    std::vector<std::string> tokensWithEmpty = tokenize(input, ",", true);
+    std::vector<xstring> tokensWithEmpty = tokenize(input, ",", true);
     EXPECT_EQ(tokensWithEmpty.size(), 5);
     EXPECT_EQ(tokensWithEmpty[0], "hello");
     EXPECT_EQ(tokensWithEmpty[1], "");
@@ -48,7 +48,7 @@ TEST(TokenizeTest, EmptyTokens) {
 
 TEST(TokenizeTest, EmptyInput) {
     std::string input = "";
-    std::vector<std::string> tokens = tokenize(input, ",", false);
+    std::vector<xstring> tokens = tokenize(input, ",", false);
     
     EXPECT_TRUE(tokens.empty());
 }

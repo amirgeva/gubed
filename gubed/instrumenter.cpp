@@ -158,7 +158,14 @@ public:
 		std::vector<Block> block_stack;
 		for (size_t i = 0; i < m_CodeLines.size(); ++i)
 		{
-			const std::string& line = m_CodeLines[i];
+			std::string line = m_CodeLines[i];
+			{
+				auto it = line.find("//");
+				if (it != std::string::npos)
+				{
+					line = line.substr(0, it); // Remove comments
+				}
+			}
 			const std::string ws = get_leading_white_space(line);
 			std::string sline = trim(line);
 			std::smatch match;
@@ -176,8 +183,9 @@ public:
 					if (n > 2)
 					{
 						auto vars = tokenize(match[2].str(), ",", false);
-						for(const auto& var : vars)
+						for(auto var : vars)
 						{
+							var.trim();
 							if (!var.empty())
 							{
 								block_stack.back().variables.push_back(var);
@@ -209,8 +217,10 @@ public:
 				{
 					block_stack.pop_back();
 				}
-				if (brace_count == 1) method_name = "";
-				if (brace_count == 0) class_name = "";
+				if (brace_count == 1) 
+					method_name = "";
+				if (brace_count == 0)
+					class_name = "";
 			}
 			if (endswith(sline, "{"))
 			{

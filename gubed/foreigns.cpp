@@ -23,8 +23,22 @@ public:
 	{
 		try
 		{
+			std::cout << "Loading module: " << dll_path << std::endl;
 			hModule = LoadLibraryA(dll_path.c_str());
-			if (!hModule) throw std::runtime_error("Failed to load module: " + dll_path);
+			if (!hModule)
+			{
+				DWORD err = GetLastError();          // <-- grab it right away
+				char msgBuf[512]{};
+				FormatMessageA(FORMAT_MESSAGE_FROM_SYSTEM |
+							   FORMAT_MESSAGE_IGNORE_INSERTS,
+							   nullptr, err,
+							   0,                     // language (0 = caller locale)
+							   msgBuf, sizeof msgBuf,
+							   nullptr);
+				printf("LoadLibraryA failed (error %lu): %s\n", err, msgBuf);
+
+				throw std::runtime_error("Failed to load module: " + dll_path);
+			}
 			Initialize = (void (*)(WrenVM*))GetProcAddress(hModule, "Initialize");
 			if (!Initialize) throw std::runtime_error("No Initialize function found in " + dll_path);
 			Shutdown = (void (*)())GetProcAddress(hModule, "Shutdown");
@@ -195,18 +209,18 @@ void load_shared_libraries(const std::string& path, WrenVM* vm)
 		}
 		else
 		{
-			std::cerr << "Failed to load module: " << lib << std::endl;
+			std::cerr << "Invalid module: " << lib << std::endl;
 		}
 	}
 }
 
-void InitializeForeignModules(const std::string& path, WrenVM* vm)
+void initialize_foreign_modules(const std::string& path, WrenVM* vm)
 {
 	native_modules.clear();
 	load_shared_libraries(path, vm);
 }
 
-void ShutdownForeignModules()
+void shutdown_foreign_modules()
 {
 	native_modules.clear();
 }

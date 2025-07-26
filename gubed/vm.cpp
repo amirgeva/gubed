@@ -9,7 +9,7 @@
 
 class QuitException : public std::exception {};
 
-std::shared_ptr<IUserInterface> UI = IUserInterface::Create();
+std::shared_ptr<IUserInterface> UI;
 
 const char* debugger_class_code = R"(
 class Gubedder {
@@ -20,6 +20,11 @@ class Gubedder {
 const std::string callback_key = "gubed.Gubedder.callback(_,_)";
 
 IUserInterface::Action action = IUserInterface::STEP;
+
+void quit()
+{
+	throw QuitException();
+}
 
 extern "C" {
 
@@ -34,18 +39,18 @@ extern "C" {
 			size_t line_index = details.line_index;
 			if (action == IUserInterface::CONTINUE)
 			{
-				if (!UI->IsBreakpoint(module->get_name(), line_index))
+				if (!UI->is_breakpoint(module->get_name(), line_index))
 					return;
 			}
 			if (line_index < module->get_line_count())
 			{
-				UI->LoadModule(module->get_name());
-				UI->HighlightLine(line_index);
-				UI->SetVariables(vars ? vars : "");
-				action = UI->UILoop();
+				UI->load_module(module->get_name());
+				UI->highlight_line(line_index);
+				UI->set_variables(vars ? vars : "");
+				action = UI->ui_loop();
 				if (action == IUserInterface::QUIT)
 				{
-					throw QuitException();
+					quit();
 				}
 			}
 		}
@@ -71,7 +76,8 @@ extern "C" {
 
 	static void system_print(WrenVM* vm, const char* text)
 	{
-		std::cout << text;
+		if (UI)
+			UI->print(text);
 	}
 
 
@@ -82,13 +88,18 @@ extern "C" {
 							 int line,
 							 const char* message)
 	{
+		if (!module) module = "Unknown";
 		LineDetails	details;
 		if (Singleton<LineMapper>::Instance().search_line_details(module, line, details))
 		{
 			line = details.line_index;
 		}
 		else
+		{
+			std::cerr << "Error in module '" << module
+				<< "' at line " << line << ": " << message << std::endl;
 			return;
+		}
 		switch (type)
 		{
 			case WREN_ERROR_COMPILE:
@@ -152,6 +163,10 @@ extern "C" {
 VMWrapper::VMWrapper()
 	: vm(nullptr)
 {
+	if (!UI)
+	{
+		UI = IUserInterface::Create();
+	}
 	WrenConfiguration config;
 	wrenInitConfiguration(&config);
 	config.reallocateFn = malloc_wren_realloc;
@@ -161,7 +176,7 @@ VMWrapper::VMWrapper()
 	config.errorFn = report_error;
 	{
 		vm = wrenNewVM(&config);
-		InitializeForeignModules(".", vm);
+		initialize_foreign_modules(".", vm);
 
 		WrenInterpretResult result = wrenInterpret(vm, "gubed", debugger_class_code);
 		if (result != WREN_RESULT_SUCCESS)
@@ -175,7 +190,7 @@ VMWrapper::~VMWrapper()
 {
 	if (vm)
 		wrenFreeVM(vm);
-	ShutdownForeignModules();
+	shutdown_foreign_modules();
 }
 
 void VMWrapper::run_module(const std::string& module_name)

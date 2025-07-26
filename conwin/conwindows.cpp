@@ -262,8 +262,10 @@ public:
 };
 
 // Implement Console class methods
-Console::Console() : m_Impl(std::make_unique<ConsoleImpl>())
-{}
+Console::Console()
+{
+	m_Impl = std::make_unique<ConsoleImpl>();
+}
 
 Console::~Console()
 {

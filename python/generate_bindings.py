@@ -37,8 +37,10 @@ def process_class(header_path: str, module_name: str, class_lines: List[str]):
     f.write(f'{header_comment}\n')
     m = re.match(class_pattern, class_lines[0])
     if not m:
+        print("Class pattern not found.  Ignoring")
         return
     class_name = m.group(1)
+    print(f"Found class {class_name}")
     func_mapping = {}
     code = []
     for line in class_lines[1:]:
@@ -50,6 +52,7 @@ def process_class(header_path: str, module_name: str, class_lines: List[str]):
             arguments = [s for s in g[2].split(',') if s]
             prototype=f'{func_name}(' + ','.join(['_']*len(arguments)) + ')'
             key = f'{module_name}.{class_name}.{prototype}'
+            print(f"Generating wrapper for {module_name}.{class_name}.{func_name}")
             wrapper_name = f'{module_name}_{class_name}_{func_name}_wrapper'
             func_mapping[key] = wrapper_name
             f.write(f'\nvoid {wrapper_name}(WrenVM* vm)\n{{\n')

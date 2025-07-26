@@ -61,7 +61,7 @@ class Window
 	int											m_StartOffset = 0;
 	Pointd										m_SizePercent=Pointd(0,0);
 	xstring										m_Title, m_StatusLine;
-	int											m_SelectedLine = -1;
+	int											m_HighlightLine = -1;
 public:
 	Window(const Rect& border_rect);
 	Window(const Pointd& size_percent);
@@ -71,6 +71,8 @@ public:
 	void				set_size_percent(const Pointd& size_percent);
 	const Pointd&		get_size_percent() const;
 	void				set_content(const std::vector<xstring>& content_lines);
+	const std::vector<xstring>& get_content() const;
+	void				append_content(const xstring& line);
 	void				set_rect(const Rect& rect);
 	const Rect&			get_border_rect() const;
 	const Rect&			get_content_rect() const;
@@ -78,26 +80,27 @@ public:
 	void				set_line_foreground_color(size_t line, const Color& color);
 	void				set_line_background_color(size_t line, const Color& color);
 	const ColorPair&	get_line_color(size_t line) const;
-	void				set_selected_line(int line);
+	int					get_highlight_line() const;
+	void				set_highlight_line(int line);
+	void				change_highlight_line(int delta);
 	void				ensure_visible(int line);
-	void				draw() const;
+	void				draw(bool active) const;
 };
 
 using WindowPtr = std::shared_ptr<Window>;
 
 class Desktop
 {
-	std::vector<WindowPtr> m_Windows;
+	std::vector<WindowPtr>		m_Windows;
+	xstring						m_StatusLine;
 public:
-	void add_window(const WindowPtr& window) { m_Windows.push_back(window); }
-	const std::vector<WindowPtr>& get_windows() const { return m_Windows; }
-	WindowPtr get_window(size_t index) const 
-	{
-		if (index < m_Windows.size())
-			return m_Windows[index];
-		return nullptr;
-	}
-	Key get_key(bool wait = true);
-	void clear();
-	void draw();
+	void							add_window(const WindowPtr& window);
+	const std::vector<WindowPtr>&	get_windows() const;
+	size_t							size() const;
+	WindowPtr						get_window(size_t index) const;
+	Rect							get_rect();
+	Key								get_key(bool wait = true);
+	void							clear();
+	void							draw(WindowPtr active_window);
+	void							set_status_line(const xstring& status_line);
 };

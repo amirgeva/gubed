@@ -63,7 +63,10 @@
     self& trim_left()
     {
       int p = int(parent::find_first_not_of(" \t\n\r"));
-      if (p > 0) *this = parent::substr(p);
+      if (p > 0)
+          *this = parent::substr(p);
+      else
+          *this = "";
       return *this;
     }
 
@@ -71,7 +74,9 @@
     {
       int p = int(parent::find_last_not_of(" \t\n\r"));
       if (p >= 0)
-        *this = parent::substr(0, p + 1);
+          *this = parent::substr(0, p + 1);
+      else
+          *this = "";
       return *this;
     }
 

@@ -1,9 +1,8 @@
 #include "strutils.h"
 
-
-std::vector<std::string> tokenize(const std::string& line, const std::string& delimiter_characters, bool include_empty_tokens)
+std::vector<xstring> tokenize(const xstring& line, const xstring& delimiter_characters, bool include_empty_tokens)
 {
-	std::vector<std::string> tokens;
+	std::vector<xstring> tokens;
 
 	if (line.empty())
 		return tokens;
@@ -17,7 +16,7 @@ std::vector<std::string> tokenize(const std::string& line, const std::string& de
 		end = line.find_first_of(delimiter_characters, start);
 
 		// Extract the token
-		std::string token;
+		xstring token;
 		if (end == std::string::npos)
 			token = line.substr(start);
 		else

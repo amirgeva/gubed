@@ -11,10 +11,11 @@ class IUserInterface
 public:
 	virtual ~IUserInterface() = default;
 
-	virtual void LoadModule(const xstring& module_name) = 0;
-	virtual void HighlightLine(size_t line_index) = 0;
-	virtual void SetVariables(const std::string& variables) = 0;
-	virtual bool IsBreakpoint(const xstring& module_name, size_t line_index) = 0;
+	virtual void load_module(const xstring& module_name) = 0;
+	virtual void highlight_line(size_t line_index) = 0;
+	virtual void set_variables(const std::string& variables) = 0;
+	virtual bool is_breakpoint(const xstring& module_name, size_t line_index) = 0;
+	virtual void print(const char* text) = 0;
 
 	enum Action
 	{
@@ -24,7 +25,7 @@ public:
 		QUIT
 	};
 
-	virtual Action UILoop() = 0;
+	virtual Action ui_loop() = 0;
 
 	static std::shared_ptr<IUserInterface> Create();
 };
