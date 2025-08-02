@@ -76,8 +76,17 @@ extern "C" {
 
 	static void system_print(WrenVM* vm, const char* text)
 	{
-		if (UI)
-			UI->print(text);
+		if (!is_instrumentation_enabled())
+		{
+			std::cout << text << std::endl;
+		}
+		else
+		{
+			if (UI)
+			{
+				UI->print(text);
+			}
+		}
 	}
 
 

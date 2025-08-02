@@ -20,6 +20,11 @@ void disable_instrumentation()
 	Singleton<LineMapper>::Instance().disable();
 }
 
+bool is_instrumentation_enabled()
+{
+	return instrumentation_enabled;
+}
+
 lines_vec load_module_lines(const char* name)
 {
 	lines_vec res;
