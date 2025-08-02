@@ -8,7 +8,7 @@ class_pattern = r'class (\w+)'
 argument_pattern = r'(int|const char\*|const Bytes\&) (\w+)'
 return_type_pattern = r'(void|int|double|bool|std::string)'
 multi_argument_pattern = argument_pattern + r'(, '+argument_pattern+')*'
-func_pattern = r'static '+return_type_pattern+r' (\w+)\(([^)]*)\);'
+func_pattern = r'static\s+'+return_type_pattern+r'\s+(\w+)\(([^)]*)\);'
 type_slot_mapping={
     'int': 'Double',
     'double': 'Double',
